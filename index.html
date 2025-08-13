@@ -965,21 +965,24 @@
         <script src="js/app.js"></script>
         <script>
             document.addEventListener('DOMContentLoaded', function () {
-              // Listen for *any* modal being shown
+              const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+             
               document.querySelectorAll('.modal').forEach(function (modal) {
                 modal.addEventListener('show.bs.modal', function () {
-                  // Find any <embed> inside the modal
                   modal.querySelectorAll('embed[type="application/pdf"]').forEach(function (pdfEmbed) {
                     const originalSrc = pdfEmbed.dataset.originalSrc || pdfEmbed.src;
-
-                    // Store original src if not already stored
                     if (!pdfEmbed.dataset.originalSrc) {
                       pdfEmbed.dataset.originalSrc = originalSrc;
                     }
-
-                    // Append a timestamp to force reload
-                    const separator = originalSrc.includes('?') ? '&' : '?';
-                    pdfEmbed.src = originalSrc + separator + 't=' + Date.now();
+             
+                    if (isSafari) {
+                      // Safari: force reload with timestamp
+                      const separator = originalSrc.includes('?') ? '&' : '?';
+                      pdfEmbed.src = originalSrc + separator + 't=' + Date.now();
+                    } else {
+                      // Other browsers: restore original src (no forced reload)
+                      pdfEmbed.src = originalSrc;
+                    }
                   });
                 });
               });
