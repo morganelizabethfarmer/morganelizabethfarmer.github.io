@@ -976,12 +976,17 @@
                     }
              
                     if (isSafari) {
-                      // Safari: force reload with timestamp
+                      // Safari: force reload with a timestamp
                       const separator = originalSrc.includes('?') ? '&' : '?';
-                      pdfEmbed.src = originalSrc + separator + 't=' + Date.now();
+                      const newSrc = originalSrc + separator + 't=' + Date.now();
+                      if (pdfEmbed.src !== newSrc) {
+                        pdfEmbed.src = newSrc;
+                      }
                     } else {
-                      // Other browsers: restore original src (no forced reload)
-                      pdfEmbed.src = originalSrc;
+                      // Other browsers: only reset src if it somehow got changed
+                      if (pdfEmbed.src !== originalSrc) {
+                        pdfEmbed.src = originalSrc;
+                      }
                     }
                   });
                 });
