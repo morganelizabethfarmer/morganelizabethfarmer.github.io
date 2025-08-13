@@ -963,35 +963,37 @@
         <!-- scripts -->
         <script src="js/particles.js"></script>
         <script src="js/app.js"></script>
+             
         <script>
-            document.addEventListener('DOMContentLoaded', function () {
-              const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-             
-              document.querySelectorAll('.modal').forEach(function (modal) {
-                modal.addEventListener('show.bs.modal', function () {
-                  modal.querySelectorAll('embed[type="application/pdf"]').forEach(function (pdfEmbed) {
-                    const originalSrc = pdfEmbed.dataset.originalSrc || pdfEmbed.src;
-                    if (!pdfEmbed.dataset.originalSrc) {
-                      pdfEmbed.dataset.originalSrc = originalSrc;
-                    }
-             
-                    if (isSafari) {
-                      // Safari: force reload with a timestamp
-                      const separator = originalSrc.includes('?') ? '&' : '?';
-                      const newSrc = originalSrc + separator + 't=' + Date.now();
-                      if (pdfEmbed.src !== newSrc) {
-                        pdfEmbed.src = newSrc;
-                      }
-                    } else {
-                      // Other browsers: only reset src if it somehow got changed
-                      if (pdfEmbed.src !== originalSrc) {
-                        pdfEmbed.src = originalSrc;
-                      }
-                    }
-                  });
-                });
+        document.addEventListener('DOMContentLoaded', function () {
+          const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+         
+          document.querySelectorAll('.modal').forEach(function (modal) {
+            modal.addEventListener('show.bs.modal', function () {
+              modal.querySelectorAll('embed[type="application/pdf"]').forEach(function (oldEmbed) {
+                // Save the original src the first time we see it
+                const originalSrc = oldEmbed.dataset.originalSrc || oldEmbed.src;
+                if (!oldEmbed.dataset.originalSrc) {
+                  oldEmbed.dataset.originalSrc = originalSrc;
+                }
+         
+                // Build the correct src for this browser
+                let newSrc;
+                if (isSafari) {
+                  const separator = originalSrc.includes('?') ? '&' : '?';
+                  newSrc = originalSrc + separator + 't=' + Date.now();
+                } else {
+                  newSrc = originalSrc; // no timestamp for non-Safari
+                }
+         
+                // Clone the embed, set fresh src, and replace in DOM
+                const newEmbed = oldEmbed.cloneNode(true);
+                newEmbed.src = newSrc;
+                oldEmbed.parentNode.replaceChild(newEmbed, oldEmbed);
               });
             });
+          });
+        });
         </script>
     </body>
 </html>
